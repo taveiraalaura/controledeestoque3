@@ -21,7 +21,9 @@ import {
   createRequisition,
   attendRequisition,
   cancelRequisition,
+  fetchHealth,
 } from './lib/api.ts';
+import { localStore } from './lib/localStore.ts';
 import {
   Material,
   Movement,
@@ -64,6 +66,7 @@ export default function App() {
   // Loading States
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [storageMode, setStorageMode] = useState<'server' | 'local'>('server');
 
   // Notification Toast
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -95,20 +98,37 @@ export default function App() {
     else setRefreshing(true);
 
     try {
-      const [mats, movs, reqs, kpiData] = await Promise.all([
+      // Check server health to detect whether API is online or falling back to local
+      fetchHealth().then((h) => {
+        setStorageMode(h.mode);
+      }).catch(() => {
+        setStorageMode('local');
+      });
+
+      // Use Promise.allSettled so a delay in one endpoint never blocks the whole system
+      const [matsResult, movsResult, reqsResult, kpiResult] = await Promise.allSettled([
         fetchMaterials(),
         fetchMovements(),
         fetchRequisitions(),
         fetchKPIs(),
       ]);
 
+      const mats = matsResult.status === 'fulfilled' && matsResult.value ? matsResult.value : localStore.getMaterials();
+      const movs = movsResult.status === 'fulfilled' && movsResult.value ? movsResult.value : localStore.getMovements();
+      const reqs = reqsResult.status === 'fulfilled' && reqsResult.value ? reqsResult.value : localStore.getRequisitions();
+      const kpiData = kpiResult.status === 'fulfilled' && kpiResult.value ? kpiResult.value : localStore.getKPIs();
+
       setMaterials(mats);
       setMovements(movs);
       setRequisitions(reqs);
-      setKpis(kpiData);
+      setKpis(kpiData || localStore.getKPIs());
     } catch (err: any) {
-      console.error('Failed to load application data', err);
-      showToast('error', 'Erro ao carregar dados do almoxarifado: ' + err.message);
+      console.warn('Fallback to localStore:', err);
+      setStorageMode('local');
+      setMaterials(localStore.getMaterials());
+      setMovements(localStore.getMovements());
+      setRequisitions(localStore.getRequisitions());
+      setKpis(localStore.getKPIs());
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -268,6 +288,7 @@ export default function App() {
         currentUser={currentUser}
         onLogout={handleLogout}
         onOpenSetup={() => setShowSetupModal(true)}
+        storageMode={storageMode}
       />
 
       {/* Main View Container */}

@@ -29,11 +29,31 @@ export const KPIsView: React.FC<KPIsViewProps> = ({
   onNavigateToStock,
   onNavigateToMovements,
 }) => {
-  if (loading || !kpis) {
+  if (loading && !kpis) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mb-3" />
-        <p className="text-sm text-slate-600">Calculando indicadores de desempenho do almoxarifado...</p>
+        <p className="text-sm text-slate-600 font-medium">Calculando indicadores de desempenho do almoxarifado...</p>
+        <p className="text-xs text-slate-400 mt-1">Consolidando dados de estoque e movimentações</p>
+      </div>
+    );
+  }
+
+  if (!kpis) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-slate-200 p-8 text-center max-w-lg mx-auto shadow-xs">
+        <AlertTriangle className="w-10 h-10 text-amber-500 mb-3" />
+        <h3 className="text-base font-semibold text-slate-900 mb-1">Indicadores Indisponíveis</h3>
+        <p className="text-xs text-slate-600 mb-4">
+          Não foi possível carregar os indicadores automaticamente. Clique abaixo para recalcular.
+        </p>
+        <button
+          onClick={onRefresh}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs cursor-pointer transition-colors"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          <span>Carregar Indicadores</span>
+        </button>
       </div>
     );
   }

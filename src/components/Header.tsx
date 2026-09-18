@@ -17,6 +17,7 @@ interface HeaderProps {
   currentUser: User;
   onLogout: () => void;
   onOpenSetup: () => void;
+  storageMode?: 'server' | 'local';
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -25,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   onLogout,
   onOpenSetup,
+  storageMode = 'server',
 }) => {
   return (
     <header id="main-header" className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs no-print">
@@ -41,8 +43,8 @@ export const Header: React.FC<HeaderProps> = ({
               <h1 className="text-lg font-bold text-slate-900 leading-tight">
                 Controle de Estoque & Almoxarifado
               </h1>
-              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-                <PackageCheck className="w-3 h-3" /> Online
+              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full" title={storageMode === 'server' ? 'Sincronizado com Banco SQLite' : 'Armazenamento Local Ativo (Compatível Vercel)'}>
+                <PackageCheck className="w-3 h-3" /> {storageMode === 'server' ? 'Online (SQLite)' : 'Online (Local)'}
               </span>
             </div>
             <p className="text-xs text-slate-500">
