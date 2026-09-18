@@ -1,0 +1,6 @@
+{
+  "name": "Controle de Estoques e Almoxarifado",
+  "description": "Sistema web de gestão de inventário para controle de entradas e saídas de materiais, requisições, relatórios de posição de estoque e indicadores de desempenho.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
